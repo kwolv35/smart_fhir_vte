@@ -26,7 +26,6 @@
         $.when(pt, obv).fail(onError);
 
         $.when(pt, obv).done(function(patient, obv) {
-		 console.log(patient);
           var byCodes = smart.byCodes(obv, 'code');
           var gender = patient.gender;
           var dob = new Date(patient.birthDate);
@@ -41,7 +40,6 @@
           if (typeof patient.name[0] !== 'undefined') {
             fname = patient.name[0].given.join(' ');
             lname = patient.name[0].family.join(' ');
-			full_name = lname + ',' + fname
           }
 
           var height = byCodes('8302-2');
@@ -154,7 +152,7 @@
     $('#holder').show();
     $('#loading').hide();
     $('#fname').html(p.fname);
-    $('#p_name').html(full_name);
+    $('#p_name').html(p.lname);
     $('#gender').html(p.gender);
     $('#p_dob').html(p.birthdate);
     $('#age_span').html(p.age);
@@ -164,6 +162,7 @@
     $('#diastolicbp').html(p.diastolicbp);
     $('#ldl').html(p.ldl);
     $('#hdl').html(p.hdl);
+	alert(p.fname);
   };
 
 })(window);
