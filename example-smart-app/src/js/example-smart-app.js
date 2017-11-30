@@ -147,6 +147,7 @@
   }
 
   window.drawVisualization = function(p) {
+	  console.log("In drawVisualization");
 	  alert(p.fname);
     $('#holder').show();
     $('#loading').hide();
