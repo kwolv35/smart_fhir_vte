@@ -204,14 +204,17 @@ DO NOT COPY OR RELEASE OUTSIDE OF ST. JOHN PROVIDENCE HEALTH SYSTEM WITHOUT PERM
 </head>
 <!--<body onload=loadData();> -->
 <body onload=LoadScreen();>
-	<div id=vte_score style="display:inline;">
+	<div id="loader" class="loader" style="display:inline;">
+		<img id="img-loader" src="I:\WININTEL\static_content\sjphs_mPages\images\ajax-loader-blue.gif" alt="Loading"/>
+	</div>
+	<div id=vte_score style="display:none;">
 		<div class="ui-widget">
 			<div class=ui-widget-content>
 				<table id=main_table align=center style="width:100%; background-color:White;" cellspacing=0 cellpadding=0>
 					<tr>
 						<td colspan=2 style="text-align:center;">
 							<div class=ui-widget-header style="padding: 5px;font-size:2.0em">
-								VTE Assessment
+								VTE Assessment v1.0
 							</div>
 						</td>
 					</tr>
