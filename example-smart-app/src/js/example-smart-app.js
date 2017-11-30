@@ -150,9 +150,9 @@
     $('#holder').show();
     $('#loading').hide();
     $('#fname').html(p.fname);
-    $('#lname').html(p.lname);
+    $('#p_name').html(p.lname);
     $('#gender').html(p.gender);
-    $('#birthdate').html(p.birthdate);
+    $('#p_dob').html(p.birthdate);
     $('#age').html(p.age);
     $('#height').html(p.height);
 	$('#heartRate').html(p.heartRate);
