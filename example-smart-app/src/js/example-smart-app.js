@@ -36,7 +36,7 @@
           var dobStr = monthIndex + '/' + day + '/' + year;
           var fname = '';
           var lname = '';
-
+		  var full_name = lname + ',' + fname
           if (typeof patient.name[0] !== 'undefined') {
             fname = patient.name[0].given.join(' ');
             lname = patient.name[0].family.join(' ');
@@ -149,20 +149,9 @@
 
   window.drawVisualization = function(p) {
 	  console.log("In drawVisualization");
-    $('#holder').show();
-    $('#loading').hide();
-    $('#fname').html(p.fname);
-    $('#p_name').html(p.lname);
-    $('#gender').html(p.gender);
+    $('#p_name').html(full_name);
     $('#p_dob').html(p.birthdate);
     $('#age_span').html(p.age);
-    $('#height').html(p.height);
-	$('#heartRate').html(p.heartRate);
-    $('#systolicbp').html(p.systolicbp);
-    $('#diastolicbp').html(p.diastolicbp);
-    $('#ldl').html(p.ldl);
-    $('#hdl').html(p.hdl);
-	alert(p.fname);
   };
 
 })(window);
