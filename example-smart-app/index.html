@@ -175,6 +175,18 @@ DO NOT COPY OR RELEASE OUTSIDE OF ST. JOHN PROVIDENCE HEALTH SYSTEM WITHOUT PERM
 				$("#bmi_highlight_no").show();
 				$("#radioset_4_no").trigger("click");
 			}
+			 extractData().then(
+        //Display Patient Demographics and Observations if extractData was success
+        function(p) {
+          drawVisualization(p);
+        },
+
+        //Display 'Failed to call FHIR Service' if extractData failed
+        function() {
+          $('#loading').hide();
+          $('#errors').html('<p> Failed to call FHIR Service </p>');
+        }
+      );
 			setTimeout(function () { toggleView();}, 500);
 		}
 
@@ -211,7 +223,7 @@ DO NOT COPY OR RELEASE OUTSIDE OF ST. JOHN PROVIDENCE HEALTH SYSTEM WITHOUT PERM
 					<tr>
 						<td colspan=2 style="text-align:center;">
 							<div class=ui-widget-header style="padding: 5px;font-size:2.0em">
-								VTE Assessment v1.0
+								VTE Assessment v1.1
 							</div>
 						</td>
 					</tr>
