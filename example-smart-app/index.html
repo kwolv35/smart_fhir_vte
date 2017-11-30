@@ -1,103 +1,996 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta http-equiv='X-UA-Compatible' content='IE=edge' />
-    <meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
-    <title>Example-SMART-App</title>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--
+CREATED: 01/21/2016
+BRIAN CONWAY
+ASCENSION INFORMATION SERVICES
+INTELLECTUAL PROPERTY OF ST. JOHN PROVIDENCE HEALTH SYSTEM
+DO NOT COPY OR RELEASE OUTSIDE OF ST. JOHN PROVIDENCE HEALTH SYSTEM WITHOUT PERMISSION
+ -->
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+	<title>VTE Assessment</title>
+	
+	<meta http-equiv="Content-type" content="text/html; charset=us-ascii">
+	<meta http-equiv="X-UA-Compatible" content="IE=11">
+	<meta http-equiv="Content-Type" content="XMLCCLREQUEST,APPLINK,MPAGES_EVENT,CCLLINK,CCLNEWWINDOW,CCLEVENT,CCLEKSREPLYOBJECT" name="discern"/>
+	<!--<link rel=stylesheet type=text/css href="sjphs_mPages/css/steel/jquery-ui.css"/>-->
+	<!--<link rel=stylesheet type=text/css href="sjphs_mPages/css/sjphs/jquery-ui.css"/>-->
+	<LINK rel=stylesheet type=text/css href="sjphs_mPages/css/redmond_1_11_4/jquery-ui.css"/>
+<!--<LINK rel=stylesheet type=text/css href="sjphs_mPages/css/sjphs_1_11_4/jquery-ui.css"/>-->
+	<LINK rel=stylesheet type=text/css href="sjphs_mPages/fonts/Ubuntu/ubuntu_font.css"/>
+	<script language="javascript" type="text/javascript" src="sjphs_mPages/scripts/v2/sjphs_script.js"></script>
+	<script language="javascript" type="text/javascript" src="sjphs_mPages/css/redmond_1_11_4/external/jquery/jquery.js"></script>
+	<script language="javascript" type="text/javascript" src="sjphs_mPages/css/redmond_1_11_4/jquery-ui.js"></script>
+	<script>
+		$(function () {
+			//activate the buttonset for each question
+			$(".buttonset").each(function(i) {
+				var buttonset_id =  $(this).attr('id');
+				$("#"+ buttonset_id).buttonset();
+				//$("#"+ buttonset_id).buttonset("refresh");
+			});
 
-    <link rel='stylesheet' type='text/css' href='./src/css/example-smart-app.css'>
-  <style>
-  th{background-color: silver;}
-  </style>
+			//activate the tabs
+			$( "#tabs" ).tabs({
+				activate: function( event, ui ) {
+					tabIndex = ui.newTab.index();
+				}
+			});
+
+			//default the tabs to option 1 (#2 of 3)
+			$("#tabs").tabs("option","active",1);
+
+			//What to do when a hyperlink is clicked
+			$("a").click(function () {
+				var cur_class	= $(this).attr("class");
+
+				//order a powerplan
+				if (cur_class == "pp"){
+				   alert("Ordering Powerplan");
+				}
+
+				//order a contraindication
+				else if (cur_class == "contraindication"){
+				   alert("Ordering Contraindication"); 
+				}
+
+				//bypass the alert
+				else if (cur_class == "bypass"){
+					alert("Bypassing Alert"); 
+				}
+			});
+
+			//Click event on an input
+			$("input").click(function () {
+				//var curr_id			= $(this).attr('id');
+				//get the value of what was clicked 
+				var status 			= $(this).attr("data-idx1");
+				
+				//get parent ID so we can update the score <td>
+				var pID 			= $(this).parent().attr("id");
+
+				//A YES Answer
+				if (status > 0) {
+					$("#"+ pID + "_score").removeClass("no_score");
+					$("#"+ pID + "_score").addClass("yes_score");
+				}
+
+				//A NO Answer
+				else{
+					$("#"+ pID + "_score").removeClass("yes_score");
+					$("#"+ pID + "_score").addClass("no_score");
+				}
+
+				//Set the Score Display
+				$("#"+ pID + "_score").text(status);
+
+				//Update the Score Total
+				tabulateScore();
+			});
+
+			function tabulateScore() {
+				var total_score = 0;
+
+				//Go To Each score_row with a value and add the total
+				$(".score_row").each(function( i ) {
+					//var score_id =  $(this).attr('id');
+					//alert(score_id);
+					var curr_score = $(this).text();
+						//alert(curr_score)
+						curr_score = curr_score.trim();
+
+						//Add to the total score
+						total_score = (total_score + Number(curr_score));
+				});
+				score.innerHTML = total_score;
+				CheckScoreTabs(total_score);
+			}
+
+			function CheckScoreTabs(current_score) {
+				if (current_score < 2) {
+					$("#low_risk").show();
+					$("#med_risk").show();
+					$("#high_risk").show();
+					$("#tabs").tabs("option","active",0);
+				}
+				if (current_score >= 2 && current_score <= 4) {
+					$("#low_risk").hide();
+					$("#med_risk").show();
+					$("#high_risk").show();
+					$("#tabs").tabs("option","active",1);
+				}
+				if (current_score >= 5 ) {
+					$("#low_risk").hide();
+					$("#med_risk").hide();
+					$("#high_risk").show();
+					$("#tabs").tabs("option","active",2);
+				}
+	
+			}
+		});
+
+		function LoadScreen(){
+			//Prepopulate what we already know
+			var curr_age = 25;
+			var curr_bmi = 15;
+			$("#lab_results").show();
+			$("#vte_option").show();
+			//Set Age Display
+			$("#age_span_highlight").html(curr_age + " Years old");
+			$("#age_span").html(curr_age + " Years old");
+
+			if (curr_age <= 39) {
+				$("#age_range_1").hide();
+				$("#age_range_2").hide();
+				$("#age_range_3").hide();
+				$("#age_highlight_no").show();
+			}
+			if (curr_age >= 40 && curr_age <= 64) {
+				$("#age_range_2").hide();
+				$("#age_range_3").hide();
+				$("#radioset_1_yes").trigger( "click" );
+				$("#age_highlight_yes").show();
+			}
+			else if (curr_age >= 65 && curr_age <= 74) {
+				$("#age_range_1").hide();
+				$("#age_range_3").hide();
+				$("#radioset_2_yes").trigger("click");
+				$("#age_highlight_yes").show();
+			}
+			else if (curr_age >= 75) {
+				$("#age_range_1").hide();
+				$("#age_range_2").hide();
+				$("#radioset_3_yes").trigger("click");
+				$("#age_highlight_yes").show();
+			}
+
+			//Set BMI Display
+			$("#bmi_span_highlight").html(curr_bmi);
+			$("#bmi_span").html(curr_bmi);
+
+			if (curr_bmi != "N/A" && curr_bmi > 25) {
+				$("#bmi").show();
+				$("#bmi_highlight_yes").show();
+				$("#radioset_4_yes").trigger("click");
+			}
+			else{
+				$("#bmi").hide();
+				$("#bmi_highlight_no").show();
+				$("#radioset_4_no").trigger("click");
+			}
+			setTimeout(function () { toggleView();}, 500);
+		}
+
+		function toggleView() {
+			$("#loader").toggle();
+			$("#vte_score").toggle();
+		}
+		document.body.style.zoom="80%"
+	</script>
+	<style>
+		.buttonset{font-size: 0.90em;}
+		.even{background:#E8EBF5;}
+		.odd{background:#FFF;}
+		body{font-family: Calibri, Ubuntu; font-size: 100%;}
+		div{font-family: Calibri, Ubuntu;}
+		td{font-family: Calibri, Ubuntu;}
+		span{font-family: Calibri, Ubuntu;}
+		.ui-tabs-panel {height: 400px; overflow: auto;}
+		.yes_score{color:green;font-weight:bold;font-size:1.25em; text-align: center;}
+		.no_score{color:navy;font-weight:bold;font-size:1.25em; text-align: center;}
+		.loader {position: fixed;top: 50%;left: 5%;margin-left: -50px;margin-top: -50px;text-align:center;z-index:9999;overflow: auto;width: 100%;height: 102%;}
+		.table_row_title{font-weight: bold;padding: 3px;border-bottom: 1px solid silver; border-top: 1px solid silver;font-size: 0.80em;}
+		.table_row_data{font-weight: normal;padding: 3px;border-bottom: 1px solid silver; font-size: 0.80em;}
+		a{font-size: 0.80em;}
+		score_row{text-align: center;}
+	</style>
 </head>
-
-  <body>
-    <!--<div id='errors'>
-    </div>
-    <div id="loading" class="spinner">
-      <div class="bounce1"></div>
-      <div class="bounce2"></div>
-      <div class="bounce3"></div>
-    </div> -->
-    <div id='holder' style="display: inline;">
-      <h2>Example-SMART-App v1.2</h2>
-
-      <h2>Patient Resource</h2>
-      <table>
-        <tr>
-          <th>First Name:</th>
-          <td id='fname'></td>
-        </tr>
-        <tr>
-          <th>Last Name:</th>
-          <td id='lname'></td>
-        </tr>
-        <tr>
-          <th>Gender:</th>
-          <td id='gender'></td>
-        </tr>
-        <tr>
-          <th>Date of Birth:</th>
-          <td id='birthdate'></td>
-        </tr>
-        <tr>
-          <th>Age:</th>
-          <td id='age'></td>
-        </tr>
-      </table>
-      <h2>Observation Resource</h2>
-      <table>
-        <tr>
-          <th>Height:</th>
-          <td id='height'></td>
-        </tr>
-        <tr>
-          <th>Systolic Blood Pressure:</th>
-          <td id='systolicbp'></td>
-
-        </tr>
-        <tr>
-          <th>Diastolic Blood Pressure:</th>
-          <td id='diastolicbp'></td>
-        </tr>
-        <tr>
-          <th>LDL:</th>
-          <td id='ldl'></td>
-        </tr>
-        <tr>
-          <th>HDL:</th>
-          <td id='hdl'></td>
-        </tr>
-		<tr>
-          <th>Heart Rate:</th>
-          <td id='heartRate'></td>
-        </tr>
-      </table>
-    </div>
-    <script src='./lib/es6-shim-0.35.1.min.js'></script>
-    <script src='./src/js/example-smart-app.js'></script>
-    <script src='./lib/fhir-client-v0.1.11.js'></script>
-
-    <!-- Prevent session bleed caused by single threaded embedded browser and sessionStorage API -->
-    <!-- https://github.com/cerner/fhir-client-cerner-additions -->
-    <script src='./lib/fhir-client-cerner-additions-1.0.0.js'></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script>
-      
-	  /*
-	  extractData().then(
-        //Display Patient Demographics and Observations if extractData was success
-        function(p) {
-          drawVisualization(p);
-        },
-
-        //Display 'Failed to call FHIR Service' if extractData failed
-        function() {
-          $('#loading').hide();
-          $('#errors').html('<p> Failed to call FHIR Service </p>');
-        }
-      );
-	  */
-    </script>
-  </body>
-</html>			
+<!--<body onload=loadData();> -->
+<body onload=LoadScreen();>
+	<div id="loader" class="loader" style="display:inline;">
+		<img id="img-loader" src="I:\WININTEL\static_content\sjphs_mPages\images\ajax-loader-blue.gif" alt="Loading"/>
+	</div>
+	<div id=vte_score style="display:none;">
+		<div class="ui-widget">
+			<div class=ui-widget-content>
+				<table id=main_table align=center style="width:100%; background-color:White;" cellspacing=0 cellpadding=0>
+					<tr>
+						<td colspan=2 style="text-align:center;">
+							<div class=ui-widget-header style="padding: 5px;font-size:2.0em">
+								VTE Assessment
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td colspan=2 style="width:15%; vertical-align:top;">
+							<table class=ui-widget-content style="width:100%;" cellspacing=0 cellpadding=0 >
+								<tr class=even>
+									<td class=table_row_title style="text-align: center; width:auto;">
+										Name
+									</td>
+									<td class=table_row_title style="text-align: center; width:auto;">
+										FIN
+									</td>
+									<td class=table_row_title style="text-align: center; width:auto;">
+										MRN
+									</td>
+									<td class=table_row_title style="text-align: center; width:auto;">
+										ADMITTED
+									</td>
+									<td class=table_row_title style="text-align: center; width:auto;">
+										AGE
+									</td>
+									<td class=table_row_title style="text-align: center; width:auto;">
+										BMI
+									</td>
+									<td class=table_row_title style="text-align: center; width:auto;">
+										Score
+									</td>
+								</tr>
+								<tr class=odd>
+									<td class=table_row_data style="text-align: center; width:auto;">
+										@PATIENT:{BASE_INFO}
+									</td>
+									<td class=table_row_data style="text-align: center; width:auto;">
+										@MEDICALNUMBER:{BASE_INFO}
+									</td>
+									<td class=table_row_data style="text-align: center; width:auto;">
+										753753753
+									</td>
+									<td class=table_row_data style="text-align: center; width:auto;">
+										09/29/2016 09:35
+									</td>
+									<td class=table_row_data style="text-align: center; width:auto;">
+										<span id=age_highlight_yes style="display: none;">
+											<span id=age_span_highlight class="ui-state-error ui-corner-all " style="padding: 0 0.5em;">
+												<span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;">
+ 
+												</span>
+											</span>
+										</span>
+										<span id=age_highlight_no style="display: none;">
+											<span id=age_span></span>
+										</span>
+ 
+									</td>
+									<td class=table_row_data style="text-align: center; width:auto;">
+										<span id=bmi_highlight_yes style="display: none;">
+											<span id=bmi_span_highlight class="ui-state-error ui-corner-all" style="padding: 0 0.5em;">
+												<span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>
+											</span>
+										</span>
+										<span id=bmi_highlight_no style="display: none;">
+											<span id=bmi_span></span>
+										</span>
+									</td>
+									<td id=score class=table_row_data style="text-align: center; width:auto;">
+										0
+									</td>
+								</tr>
+							</table>
+							<table id=lab_results class=ui-widget-content style="width:100%;" cellspacing=0 cellpadding=0 >
+								<tr class=even>
+									<td class=table_row_title style="text-align: center; width:8.33%;">
+										PTT
+									</td>
+									<td class=table_row_title style="text-align: center; width:8.33%;">
+										INR
+									</td>
+									<td class=table_row_title style="text-align: center; width:8.33%;">
+										Hgb
+									</td>
+									<td class=table_row_title style="text-align: center; width:8.33%;">
+										Hct
+									</td>
+									<td class=table_row_title style="text-align: center; width:8.33%;">
+										RBC
+									</td>
+									<td class=table_row_title style="text-align: center; width:8.33%;">
+										MCV
+									</td>
+									<td class=table_row_title style="text-align: center; width:8.33%;">
+										MCH
+									</td>
+									<td class=table_row_title style="text-align: center; width:8.33%;">
+										MCHC
+									</td>
+									<td class=table_row_title style="text-align: center; width:8.33%;">
+										RDW
+									</td>
+									<td class=table_row_title style="text-align: center; width:8.33%;">
+										Platelet
+									</td>
+									<td class=table_row_title style="text-align: center; width:8.33%;">
+										MPV
+									</td>
+									<td class=table_row_title style="text-align: center; width:8.33%;">
+										WBC
+									</td>
+								</tr>
+								<tr class=odd>
+									<td class=table_row_data id=PTT style="text-align: center; width:8.33%;">
+ 
+									</td>
+									<td class=table_row_data id=INR style="text-align: center; width:8.33%;">
+ 
+									</td>
+									<td class=table_row_data id=HGB style="text-align: center; width:8.33%;">
+ 
+									</td>
+									<td class=table_row_data style="text-align: center; width:8.33%;">
+										39.1 %
+									</td>
+									<td class=table_row_data style="text-align: center; width:8.33%;">
+										4.41 Million/mcL
+									</td>
+									<td class=table_row_data style="text-align: center; width:8.33%;">
+										88.7 fL
+									</td>
+									<td class=table_row_data style="text-align: center; width:8.33%;">
+										29.7 pg
+									</td>
+									<td class=table_row_data style="text-align: center; width:8.33%;">
+										33.5 gm/dL
+									</td>
+									<td class=table_row_data style="text-align: center; width:8.33%;">
+										12.1 %
+									</td>
+									<td class=table_row_data style="text-align: center; width:8.33%;">
+										269	K/mcL
+									</td>
+									<td class=table_row_data style="text-align: center; width:8.33%;">
+										9.4	fL
+									</td>
+									<td class=table_row_data style="text-align: center; width:8.33%;">
+										5.9	K/mcL
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+					<tr>
+						<td colspan=2 style="text-align:center;">
+							<div class=ui-widget-header style="padding: 2px;font-size:2.0em">
+ 
+							</div>
+						</td>
+					</tr>
+					<div>
+					<tr>
+						<td style="width:60%; vertical-align:top;">
+							<div id=vte_score  style="display:inline;">
+								<table class=ui-widget-content cellpadding=0 cellspacing= 0 style="width: 100%;">
+									<tr id=age_range_1>
+										<td style="width:75%; vertical-align:top; border-bottom: 1px solid silver;">
+											<div class=ui-widget style="font-size:1.0em;">
+												<table style="width:100%; padding: 3px;">
+													<tr>
+														<td style="height:auto; width:70%;">
+															Patient Age 40 - 60
+															<span style="color:navy; font-size:0.90em; font-weight:bold;"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+																<span id=age_radioset_1>
+																</span>
+															</span>
+														</td>
+														<td style="height:auto; width:20%;text-align: right;">
+															<div id="radioset_1" class=buttonset data-idx1=question_1 style="display:inline;">
+																<input type="radio" id="radioset_1_yes" name="radioset_1" data-idx1=1><label for="radioset_1_yes">Yes</label>
+																<input type="radio" id="radioset_1_no" name="radioset_1" data-idx1=0><label for="radioset_1_no">No</label>
+															</div>
+														</td>
+														<td style="height:auto; width:10%;" id=radioset_1_score class=score_row>
+ 
+														</td>
+													</tr>
+												</table>
+											</div>
+										</td>
+									</tr>
+									<tr id=age_range_2>
+										<td style="width:75%; vertical-align:top; border-bottom: 1px solid silver;">
+											<div class=ui-widget style="font-size:1.0em;">
+												<table style="width:100%;padding: 3px;">
+													<tr>
+														<td style="height:auto; width:70%;">
+															Patient Age 61 - 74
+															<span style="color:navy; font-size:0.90em; font-weight:bold;"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+																<span id=age_radioset_2>
+																</span>
+															</span>
+														</td>
+														<td style="height:auto; width:20%;text-align: right;">
+															<div id="radioset_2" class=buttonset data-idx1=question_2 style="display:inline;">
+																<input type="radio" id="radioset_2_yes" name="radioset_2" data-idx1=2><label for="radioset_2_yes">Yes</label>
+																<input type="radio" id="radioset_2_no" name="radioset_2" data-idx1=0><label for="radioset_2_no">No</label>
+															</div>
+														</td>
+														<td style="height:auto; width:10%;" id=radioset_2_score class=score_row>
+														</td>
+													</tr>
+												</table>
+											</div>
+										</td>
+									</tr>
+									<tr id=age_range_3>
+										<td style="width:75%; vertical-align:top; border-bottom: 1px solid silver;">
+											<div class=ui-widget style="font-size:1.0em;">
+												<table style="width:100%;padding: 3px;">
+													<tr>
+														<td style="height:auto; width:70%;">
+															Patient Age >= 75
+															<span style="color:navy; font-size:0.90em; font-weight:bold;"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+																<span id=age_radioset_3>
+																</span>
+															</span>
+														</td>
+														<td style="height:auto; width:20%;text-align: right;">
+															<div id="radioset_3" class=buttonset data-idx1=question_3 style="display:inline;">
+																<input type="radio" id="radioset_3_yes" name="radioset_3" data-idx1=3><label for="radioset_3_yes">Yes</label>
+																<input type="radio" id="radioset_3_no" name="radioset_3" data-idx1=0><label for="radioset_3_no">No</label>
+															</div>
+														</td>
+														<td style="height:auto; width:10%;" id=radioset_3_score class=score_row>
+ 
+														</td>
+													</tr>
+												</table>
+											</div>
+										</td>
+									</tr>
+									<tr id=bmi>
+										<td style="width:75%; vertical-align:top; border-bottom: 1px solid silver;">
+											<div class=ui-widget style="font-size:1.0em;">
+												<table style="width:100%;padding: 3px;">
+													<tr>
+														<td style="height:auto; width:70%;">
+															BMI > 25
+															<span style="color:navy; font-size:0.90em; font-weight:bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+																<span id=bmi_radioset >
+																</span>
+															</span>
+														</td>
+														<td style="height:auto; width:20%;text-align: right;">
+															<div id="radioset_4" class=buttonset data-idx1=question_4 style="display:inline;">
+																<input type="radio" id="radioset_4_yes" name="radioset_4" data-idx1=1><label for="radioset_4_yes">Yes</label>
+																<input type="radio" id="radioset_4_no" name="radioset_4" data-idx1=0><label for="radioset_4_no">No</label>
+															</div>
+														</td>
+														<td style="height:auto; width:10%;" id=radioset_4_score class=score_row>
+ 
+														</td>
+													</tr>
+												</table>
+											</div>
+										</td>
+									</tr>
+									<tr id=central_or_picc>
+										<td style="width:75%; vertical-align:top; border-bottom: 1px solid silver;">
+											<div class=ui-widget style="font-size:1.0em;">
+												<table style="width:100%;padding: 3px;">
+													<tr>
+														<td style="height:auto; width:70%;">
+															Central Line or PICC
+														</td>
+														<td style="height:auto; width:20%;text-align: right;">
+															<div id="radioset_5" class=buttonset data-idx1=question_5 style="display:inline;">
+																<input type="radio" id="radioset_5_yes" name="radioset_5" data-idx1=3><label for="radioset_5_yes">Yes</label>
+																<input type="radio" id="radioset_5_no" name="radioset_5" data-idx1=0><label for="radioset_5_no">No</label>
+															</div>
+														</td>
+														<td style="height:auto; width:10%;" id=radioset_5_score class=score_row>
+ 
+														</td>
+													</tr>
+												</table>
+											</div>
+										</td>
+									</tr>
+									<tr id=history_dvt_pe>
+										<td style="width:75%; vertical-align:top; border-bottom: 1px solid silver;">
+											<div class=ui-widget style="font-size:1.0em;">
+												<table style="width:100%;padding: 3px;">
+													<tr>
+														<td style="height:auto; width:70%;">
+															History of PE/DVT
+														</td>
+														<td style="height:auto; width:20%;text-align: right;">
+															<div id="radioset_6" class=buttonset data-idx1=question_6 style="display:inline;">
+																<input type="radio" id="radioset_6_yes" name="radioset_6" data-idx1=3><label for="radioset_6_yes">Yes</label>
+																<input type="radio" id="radioset_6_no" name="radioset_6" data-idx1=0><label for="radioset_6_no">No</label>
+															</div>
+														</td>
+														<td style="height:auto; width:10%;" id=radioset_6_score class=score_row>
+ 
+														</td>
+													</tr>
+												</table>
+											</div>
+										</td>
+									</tr>
+									<tr id=history_malignancy>
+										<td style="width:75%; vertical-align:top; border-bottom: 1px solid silver;">
+											<div class=ui-widget style="font-size:1.0em;">
+												<table style="width:100%;padding: 3px;">
+													<tr>
+														<td style="height:auto; width:70%;">
+															History of Malignancy < 1 year
+														</td>
+														<td style="height:auto; width:20%;text-align: right;">
+															<div id="radioset_7" class=buttonset data-idx1=question_7 style="display:inline;">
+																<input type="radio" id="radioset_7_yes" name="radioset_7" data-idx1=2><label for="radioset_7_yes">Yes</label>
+																<input type="radio" id="radioset_7_no" name="radioset_7" data-idx1=0><label for="radioset_7_no">No</label>
+															</div>
+														</td>
+														<td style="height:auto; width:10%;" id=radioset_7_score class=score_row>
+ 
+														</td>
+													</tr>
+												</table>
+											</div>
+										</td>
+									</tr>
+									<tr id=stroke_dx>
+										<td style="width:75%; vertical-align:top; border-bottom: 1px solid silver;">
+											<div class=ui-widget style="font-size:1.0em;">
+												<table style="width:100%;padding: 3px;">
+													<tr>
+														<td style="height:auto; width:70%;">
+															Dx of Stroke on Encounter
+														</td>
+														<td style="height:auto; width:20%;text-align: right;">
+															<div id="radioset_8" class=buttonset data-idx1=question_8 style="display:inline;">
+																<input type="radio" id="radioset_8_yes" name="radioset_8" data-idx1=2><label for="radioset_8_yes">Yes</label>
+																<input type="radio" id="radioset_8_no" name="radioset_8" data-idx1=0><label for="radioset_8_no">No</label>
+															</div>
+														</td>
+														<td style="height:auto; width:10%;" id=radioset_8_score class=score_row>
+ 
+														</td>
+													</tr>
+												</table>
+											</div>
+										</td>
+									</tr>
+									<tr id=bedrest>
+										<td style="width:75%; vertical-align:top; border-bottom: 1px solid silver;">
+											<div class=ui-widget style="font-size:1.0em;">
+												<table style="width:100%;padding: 3px;">
+													<tr>
+														<td style="height:auto; width:70%;">
+															Bedrest order(s)
+														</td>
+														<td style="height:auto; width:20%;text-align: right;">
+															<div id="radioset_9" class=buttonset data-idx1=question_9 style="display:inline;">
+																<input type="radio" id="radioset_9_yes" name="radioset_9" data-idx1=2><label for="radioset_9_yes">Yes</label>
+																<input type="radio" id="radioset_9_no" name="radioset_9" data-idx1=0><label for="radioset_9_no">No</label>
+															</div>
+														</td>
+														<td style="height:auto; width:10%;" id=radioset_9_score class=score_row>
+ 
+														</td>
+													</tr>
+												</table>
+											</div>
+										</td>
+									</tr>
+									<tr id=hip_knee_pelvis_surgery>
+										<td style="width:75%; vertical-align:top; border-bottom: 1px solid silver;">
+											<div class=ui-widget style="font-size:1.0em;">
+												<table style="width:100%;padding: 3px;">
+													<tr>
+														<td style="height:auto; width:70%;">
+															Hip, Knee, or Pelvis Surgery
+														</td>
+														<td style="height:auto; width:20%;text-align: right;">
+															<div id="radioset_10" class=buttonset data-idx1=question_10 style="display:inline;">
+																<input type="radio" id="radioset_10_yes" name="radioset_10" data-idx1=2><label for="radioset_10_yes">Yes</label>
+																<input type="radio" id="radioset_10_no" name="radioset_10" data-idx1=0><label for="radioset_10_no">No</label>
+															</div>
+														</td>
+														<td style="height:auto; width:10%;" id=radioset_10_score class=score_row>
+ 
+														</td>
+													</tr>
+												</table>
+											</div>
+										</td>
+									</tr>
+								</table>
+							</div>
+						</td>
+						<td id=vte_option style="width:40%; vertical-align:top;">
+							<div id=single style="display:none;">
+								<table class=ui-widget-content style="width:100%; none;" cellspacing=0 cellpadding=0 >
+									<tr>
+										<td>
+											<div id="tabs">
+												<ul>
+													<li id=low_risk><a style="font-size: 1.0em;" id=low_risk_tab href="#tabs-low">Low Risk</a></li>
+													<li id=med_risk><a style="font-size: 1.0em;" id=medium_risk_tab href="#tabs-medium">Medium Risk</a></li>
+													<li id=high_risk><a style="font-size: 1.0em;" id=high_risk_tab href="#tabs-high">High Risk</a></li>
+												</ul>
+												<div id="tabs-low" class="ui-tabs-panel">
+													<table align=center style="width:100%; background-color:White;border: 1px solid silver;" cellspacing=0 cellpadding=0>
+														<tr>
+															<td style="width: 100%; text-align: center;">
+																<div class=ui-widget-header style="padding: 5px;font-size:1.3em; border-radius: 3px;">
+																	When patient score is 0 - 1
+																</div>
+															</td>
+														</tr>
+														<tr class=even>
+															<td style="padding: 3px; font-weight: bold; border-bottom: 1px solid silver; border-top: 1px solid silver;">
+																Powerplan Options
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																<b>&nbsp;&nbsp;&nbsp;&nbsp;General Powerplans</b>
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=pp data-idx3=774075526 style="color: #0000EE;">VTE - DVT Prophylaxis - Medical Low Risk</a>
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=pp data-idx3=774074832 style="color: #0000EE;">VTE - DVT Prophylaxis - History of Heparin Induced Thrombocytopenia (HIT)</a>
+															</td>
+														</tr>
+														<tr class=even>
+															<td style="padding: 3px; font-weight: bold; border-bottom: 1px solid silver; border-top: 1px solid silver;">
+																Contraindication Options
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																<b>&nbsp;&nbsp;&nbsp;&nbsp;Medical Contraindication</b>
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=contraindication data-idx3=352173307 style="color: #0000EE;">Reason VTE Prophylaxis Not Received</a>
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																<b>&nbsp;&nbsp;&nbsp;&nbsp;Surgical Contraindication</b>
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=contraindication data-idx3=351920193 style="color: #0000EE;">Reason Surg Care VTE RX Prophylaxis Not Ordered</a>
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=contraindication data-idx3=351921683 style="color: #0000EE;">Reason Surg Care VTE Mech Prophylaxis Not Ordered</a>
+															</td>
+														</tr>
+														<tr class=even>
+															<td style="padding: 3px; font-weight: bold; border-bottom: 1px solid silver; border-top: 1px solid silver;">
+																Bypass Options
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=bypass data-idx3="Powerplan" style="color: #0000EE;">Alert has appeared within a Powerplan - exit alert</a>
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=bypass data-idx3="Emergency Bypass" style="color: #0000EE;">Emergency Situation - exit alert</a>
+															</td>
+														</tr>
+													</table>
+												</div>
+												<div id="tabs-medium" class="ui-tabs-panel">
+													<table align=center style="width:100%; background-color:White;border: 1px solid silver;" cellspacing=0 cellpadding=0>
+														<tr>
+															<td style="width: 100%; text-align: center;">
+																<div class=ui-widget-header style="padding: 5px;font-size:1.3em; border-radius: 3px;">
+																	When patient score is 2 - 4
+																</div>
+															</td>
+														</tr>
+														<tr class=even>
+															<td style="padding: 3px; font-weight: bold; border-bottom: 1px solid silver; border-top: 1px solid silver;">
+																Powerplan Options
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																<b>&nbsp;&nbsp;&nbsp;&nbsp;General Powerplans</b>
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=pp data-idx3=774075704 style="color: #0000EE;">VTE - DVT Prophylaxis - Medical Moderate Risk</a>
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=pp data-idx3=774074832 style="color: #0000EE;">VTE - DVT Prophylaxis - History of Heparin Induced Thrombocytopenia (HIT)</a>
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=pp data-idx3=774074561 style="color: #0000EE;">VTE - DVT Prophylaxis - General Surgery Moderate Risk</a>
+															</td>
+														</tr>
+														<tr class=even>
+															<td style="padding: 3px; font-weight: bold; border-bottom: 1px solid silver; border-top: 1px solid silver;">
+																Contraindication Options
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																<b>&nbsp;&nbsp;&nbsp;&nbsp;Medical Contraindication</b>
+															</td>
+														</tr>														
+														<tr class=odd>
+															<td style="padding: 3px;">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=contraindication data-idx3=352173307 style="color: #0000EE;">Reason VTE Prophylaxis Not Received</a>
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																<b>&nbsp;&nbsp;&nbsp;&nbsp;Surgical Contraindication</b>
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=contraindication data-idx3=351920193 style="color: #0000EE;">Reason Surg Care VTE RX Prophylaxis Not Ordered</a>
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=contraindication data-idx3=351921683 style="color: #0000EE;">Reason Surg Care VTE Mech Prophylaxis Not Ordered</a>
+															</td>
+														</tr>
+														<tr class=even>
+															<td style="padding: 3px; font-weight: bold; border-bottom: 1px solid silver; border-top: 1px solid silver;">
+																Bypass Options
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=bypass data-idx3="Powerplan" style="color: #0000EE;" data-idx1=1>Alert has appeared within a Powerplan - exit alert</a>
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=bypass data-idx3="Emergency Bypass" style="color: #0000EE;" data-idx1=2>Emergency Situation - exit alert</a>
+															</td>
+														</tr>
+													</table>
+												</div>
+												<div id="tabs-high" class="ui-tabs-panel">
+													<table align=center style="width:100%; background-color:White;border: 1px solid silver;" cellspacing=0 cellpadding=0>
+														<tr>
+															<td style="width: 100%; text-align: center;">
+																<div class=ui-widget-header style="padding: 5px;font-size:1.3em; border-radius: 3px;">
+																	When patient score is 5 or greater
+																</div>
+															</td>
+														</tr>
+														<tr class=even>
+															<td style="padding: 3px; font-weight: bold; border-bottom: 1px solid silver; border-top: 1px solid silver;">
+																Powerplan Options
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																<b>&nbsp;&nbsp;&nbsp;&nbsp;General Powerplans</b>
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=pp data-idx3=774075011 style="color: #0000EE;" data-idx1=774075011>VTE - DVT Prophylaxis - Medical High Risk</a>
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=pp data-idx3=774074427 style="color: #0000EE;" data-idx1=774074427>VTE - DVT Prophylaxis - General Surgery High Risk</a>
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=pp data-idx3=774074832 style="color: #0000EE;" data-idx1=774074832>VTE - DVT Prophylaxis - History of Heparin Induced Thrombocytopenia (HIT)</a>
+															</td>
+														</tr>
+														<!--
+														<tr class=odd>
+															<td style="padding: 3px;">
+																<b>&nbsp;&nbsp;&nbsp;&nbsp;Ortho Surgery Powerplans</b>
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=pp  style="color: #0000EE;" data-idx1=774076084>VTE - DVT Prophylaxis - Surgical Ortho High Risk Elective - Knees and Hips</a>
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=pp  style="color: #0000EE;" data-idx1=774076397>VTE - DVT Prophylaxis - Surgical Ortho High Risk Hip Fractures</a>
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=pp  style="color: #0000EE;" data-idx1=774075873>VTE - DVT Prophylaxis - Surgical Ortho High Risk Arthroscopy, Major Trauma and Non-Penetrating Spinal</a>
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																<b>&nbsp;&nbsp;&nbsp;&nbsp;Bariatric Surgery Powerplans</b>
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=pp  style="color: #0000EE;" data-idx1=774074213>VTE - DVT Prophylaxis - Surgical Bariatric BMI < 50</a>
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=pp  style="color: #0000EE;" data-idx1=774073347>VTE - DVT Prophylaxis - Surgical Bariatric BMI > 50</a>
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=pp  style="color: #0000EE;" data-idx1=907868213>VTE - DVT Prophylaxis - Surgical Bariatric History of Heparin Induced Thrombocytopenia (HIT)</a>
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																<b>&nbsp;&nbsp;&nbsp;&nbsp;Neurosurgery Powerplans</b>
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=pp  style="color: #0000EE;" data-idx1=774076585>VTE - DVT Prophylaxis - Surgical Neurosurgery Head and Spine</a>
+															</td>
+														</tr>
+														-->
+														<tr class=even>
+															<td style="padding: 3px; font-weight: bold; border-bottom: 1px solid silver; border-top: 1px solid silver;">
+																Contraindication Options
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																<b>&nbsp;&nbsp;&nbsp;&nbsp;Medical Contraindication</b>
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=contraindication data-idx3=352173307 style="color: #0000EE;">Reason VTE Prophylaxis Not Received</a>
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																<b>&nbsp;&nbsp;&nbsp;&nbsp;Surgical Contraindication</b>
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=contraindication data-idx3=351920193 style="color: #0000EE;">Reason Surg Care VTE RX Prophylaxis Not Ordered</a>
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=contraindication data-idx3=351921683 style="color: #0000EE;">Reason Surg Care VTE Mech Prophylaxis Not Ordered</a>
+															</td>
+														</tr>
+														<tr class=even>
+															<td style="padding: 3px; font-weight: bold; border-bottom: 1px solid silver; border-top: 1px solid silver;">
+																Bypass Options
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=bypass data-idx3="Powerplan"data- style="color: #0000EE;">Alert has appeared within a Powerplan - exit alert</a>
+															</td>
+														</tr>
+														<tr class=odd>
+															<td style="padding: 3px;">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# data-idx3="Emergency Bypass" class=bypass style="color: #0000EE;">Emergency Situation - exit alert</a>
+															</td>
+														</tr>
+													</table>
+												</div>
+											</div>
+										</td>
+									</tr>
+								</Table>
+							</div> <!--single div -->
+							<div id=pp style="display:inline;">
+								<table class=ui-widget-content style="width:100%; none;" cellspacing=0 cellpadding=0 >
+									<tr>
+										<td>
+											<table align=center style="width:100%; background-color:White;border: 1px solid silver;" cellspacing=0 cellpadding=0>
+												<tr>
+													<td style="width: 100%; text-align: center;">
+														<div class=ui-widget-header style="padding: 5px;font-size:1.3em; border-radius: 3px;">
+															User Options
+														</div>
+													</td>
+												</tr>
+												<tr class=even>
+													<td style="padding: 3px; font-weight: bold; border-bottom: 1px solid silver; border-top: 1px solid silver;">
+														Powerplan Options
+													</td>
+												</tr>
+												<tr class=odd>
+													<td style="padding: 3px;">
+														<b>&nbsp;&nbsp;&nbsp;&nbsp;Select Appropriate Subphase</b>
+													</td>
+												</tr>
+												<tr class=odd>
+													<td style="padding: 3px;">
+														&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=return data-idx3=774075526 style="color: #0000EE;">Return to Powerplan and select the appropriate Subphase</a>
+													</td>
+												</tr>
+												<tr class=even>
+													<td style="padding: 3px; font-weight: bold; border-bottom: 1px solid silver; border-top: 1px solid silver;">
+														Contraindication Options
+													</td>
+												</tr>
+												<tr class=odd>
+													<td style="padding: 3px;">
+														<b>&nbsp;&nbsp;&nbsp;&nbsp;Medical Contraindication</b>
+													</td>
+												</tr>
+												<tr class=odd>
+													<td style="padding: 3px;">
+														&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=contraindication data-idx3=352173307 style="color: #0000EE;">Reason VTE Prophylaxis Not Received</a>
+													</td>
+												</tr>
+												<tr class=odd>
+													<td style="padding: 3px;">
+														<b>&nbsp;&nbsp;&nbsp;&nbsp;Surgical Contraindication</b>
+													</td>
+												</tr>
+												<tr class=odd>
+													<td style="padding: 3px;">
+														&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=contraindication data-idx3=351920193 style="color: #0000EE;">Reason Surg Care VTE RX Prophylaxis Not Ordered</a>
+													</td>
+												</tr>
+												<tr class=odd>
+													<td style="padding: 3px;">
+														&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=# class=contraindication data-idx3=351921683 style="color: #0000EE;">Reason Surg Care VTE Mech Prophylaxis Not Ordered</a>
+													</td>
+												</tr>
+											</table>
+										</td>
+									</tr>
+								</Table>
+							</div> <!--pp div -->
+						</td>
+					</tr>
+				</table> <!--main table -->
+			</div> <!--ui-widget-content -->
+		</div> <!--ui-widget-->
+	</div> <!--vte_score-->
+</body>
+</html>
