@@ -15,8 +15,7 @@ DO NOT COPY OR RELEASE OUTSIDE OF ST. JOHN PROVIDENCE HEALTH SYSTEM WITHOUT PERM
 	
 
 	<LINK rel='stylesheet' type='text/css' href='src/css/redmond_1_11_4/jquery-ui.css'/>
-	<LINK rel='stylesheet' 'type=text/css' href='src/fonts/Ubuntu/ubuntu_font.css'/>
-	<SCRIPT language="javascript" type="text/javascript" src="src/css/redmond_1_11_4/external/jqueryjquery.js"></SCRIPT>
+	<SCRIPT language="javascript" type="text/javascript" src="src/css/redmond_1_11_4/external/jquery/jquery.js"></SCRIPT>
 	<SCRIPT language="javascript" type="text/javascript" src="src/css/redmond_1_11_4/jquery-ui.js"></SCRIPT>
 	<SCRIPT>
 		$(function () {
@@ -127,6 +126,7 @@ DO NOT COPY OR RELEASE OUTSIDE OF ST. JOHN PROVIDENCE HEALTH SYSTEM WITHOUT PERM
 		});
 
 		function LoadScreen(){
+			console.log("Start");
 			//Prepopulate what we already know
 			var curr_age = 25;
 			var curr_bmi = 15;
@@ -179,7 +179,7 @@ DO NOT COPY OR RELEASE OUTSIDE OF ST. JOHN PROVIDENCE HEALTH SYSTEM WITHOUT PERM
 		}
 
 		function toggleView() {
-			$("#loader").toggle();
+			//$("#loader").toggle();
 			$("#vte_score").toggle();
 		}
 		document.body.style.zoom="80%"
@@ -203,10 +203,7 @@ DO NOT COPY OR RELEASE OUTSIDE OF ST. JOHN PROVIDENCE HEALTH SYSTEM WITHOUT PERM
 	</style>
 </head>
 <!--<body onload=loadData();> -->
-<body onload=LoadScreen();>
-	<div id="loader" class="loader" style="display:inline;">
-		<img id="img-loader" src="I:\WININTEL\static_content\sjphs_mPages\images\ajax-loader-blue.gif" alt="Loading"/>
-	</div>
+<body onload=LoadScreen()>
 	<div id=vte_score style="display:none;">
 		<div class="ui-widget">
 			<div class=ui-widget-content>
