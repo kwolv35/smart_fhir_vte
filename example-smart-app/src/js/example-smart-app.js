@@ -26,6 +26,7 @@
         $.when(pt, obv).fail(onError);
 
         $.when(pt, obv).done(function(patient, obv) {
+		 console.log(patient);
           var byCodes = smart.byCodes(obv, 'code');
           var gender = patient.gender;
           var dob = new Date(patient.birthDate);
@@ -40,6 +41,7 @@
           if (typeof patient.name[0] !== 'undefined') {
             fname = patient.name[0].given.join(' ');
             lname = patient.name[0].family.join(' ');
+			full_name = lname + ',' + fname
           }
 
           var height = byCodes('8302-2');
@@ -59,7 +61,6 @@
           p.age = parseInt(calculateAge(dob));
           p.height = getQuantityValueAndUnit(height[0]);
 		  p.heartRate = getQuantityValueAndUnit(heartRate[0]);
-          alert(p.fname);
 		  if (typeof systolicbp != 'undefined')  {
             p.systolicbp = systolicbp;
           }
@@ -150,14 +151,13 @@
 
   window.drawVisualization = function(p) {
 	  console.log("In drawVisualization");
-	  alert(p.fname);
     $('#holder').show();
     $('#loading').hide();
     $('#fname').html(p.fname);
-    $('#p_name').html(p.lname);
+    $('#p_name').html(full_name);
     $('#gender').html(p.gender);
     $('#p_dob').html(p.birthdate);
-    $('#age').html(p.age);
+    $('#age_span').html(p.age);
     $('#height').html(p.height);
 	$('#heartRate').html(p.heartRate);
     $('#systolicbp').html(p.systolicbp);
